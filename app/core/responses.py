@@ -10,7 +10,7 @@ def success_response(
     status_code: int = 200,
 ) -> JSONResponse:
     """
-    Response thành công thống nhất.
+    Format response thành công thống nhất.
     """
     content = {
         "success": True,
@@ -28,17 +28,15 @@ def error_response(
     status_code: int,
     code: str,
     message: str,
-    details: Any = None,
 ) -> JSONResponse:
     """
-    Response lỗi thống nhất.
+    Format response lỗi thống nhất.
     """
     content = {
         "success": False,
         "error": {
             "code": code,
             "message": message,
-            "details": details,
         },
     }
 
