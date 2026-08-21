@@ -1,10 +1,11 @@
-from fastapi import Depends, FastAPI, status
+from fastapi import (
+    Depends,
+    FastAPI,
+    status,
+)
 from sqlalchemy import text
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
-
-# Import để SQLAlchemy nhận diện tất cả model.
-import app.models
 
 from app.core.config import settings
 from app.core.exceptions import (
@@ -17,18 +18,24 @@ from app.db.database import (
     engine,
     get_db,
 )
+
+# Import các model để SQLAlchemy nhận diện bảng.
+from app.models import (
+    ConstructionSite,
+    SiteMember,
+    User,
+    WorkItem,
+)
+
 from app.routers.auth import router as auth_router
 from app.routers.users import router as users_router
 
-app.include_router(auth_router)
-app.include_router(users_router)
 
-
-# Tạo các bảng trong database nếu chưa tồn tại.
+# Tạo bảng nếu chưa tồn tại.
 Base.metadata.create_all(bind=engine)
 
 
-# Khởi tạo ứng dụng FastAPI.
+# Phải tạo đối tượng FastAPI trước khi include router.
 app = FastAPI(
     title=settings.APP_NAME,
     description="API quản lý công trình xây dựng",
@@ -36,12 +43,13 @@ app = FastAPI(
 )
 
 
-# Đăng ký các exception handler.
+# Đăng ký exception handler.
 register_exception_handlers(app)
 
 
-# Đăng ký Authentication router.
+# Include router sau khi đã có app = FastAPI().
 app.include_router(auth_router)
+app.include_router(users_router)
 
 
 @app.get(
@@ -93,7 +101,9 @@ def database_health_check(
 
     except SQLAlchemyError as error:
         raise AppException(
-            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            status_code=(
+                status.HTTP_503_SERVICE_UNAVAILABLE
+            ),
             code="DATABASE_UNAVAILABLE",
             message="Không thể kết nối đến MySQL.",
         ) from error

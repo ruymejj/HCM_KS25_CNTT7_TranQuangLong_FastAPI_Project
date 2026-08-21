@@ -102,31 +102,11 @@ def create_access_token(
         secret_key,
         algorithm=algorithm,
     )
-def decode_access_token(
-    token: str,
-) -> dict:
-    """
-    Giải mã và kiểm tra access token.
-
-    PyJWT tự động kiểm tra chữ ký và thời gian hết hạn.
-    """
-    secret_key = settings.SECRET_KEY.strip()
-    algorithm = settings.ALGORITHM
-
-    if not secret_key:
-        raise RuntimeError(
-            "SECRET_KEY chưa được cấu hình."
-        )
-
-    if not algorithm:
-        raise RuntimeError(
-            "ALGORITHM chưa được cấu hình."
-        )
-
+def decode_access_token(token: str) -> dict:
     return jwt.decode(
         token,
-        secret_key,
-        algorithms=[algorithm],
+        settings.SECRET_KEY,
+        algorithms=[settings.ALGORITHM],
         options={
             "require": [
                 "sub",

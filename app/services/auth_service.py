@@ -18,6 +18,10 @@ def register_user(
     db: Session,
     user_data: UserCreate,
 ) -> User:
+    """
+    Đăng ký tài khoản mới.
+    """
+
     normalized_email = str(
         user_data.email
     ).strip().lower()
@@ -30,12 +34,12 @@ def register_user(
 
     if existing_user is not None:
         raise BadRequestError(
-            "Email đã được sử dụng."
+            message="Email đã được sử dụng.",
         )
 
     new_user = User(
         email=normalized_email,
-        full_name=user_data.full_name,
+        full_name=user_data.full_name.strip(),
         password_hash=hash_password(
             user_data.password
         ),
@@ -50,7 +54,7 @@ def register_user(
         db.rollback()
 
         raise BadRequestError(
-            "Email đã được sử dụng."
+            message="Email đã được sử dụng.",
         ) from error
 
     return new_user
@@ -62,8 +66,9 @@ def authenticate_user(
     password: str,
 ) -> User:
     """
-    Xác thực email và mật khẩu.
+    Xác thực email và mật khẩu khi đăng nhập.
     """
+
     normalized_email = email.strip().lower()
 
     user = (
@@ -72,19 +77,20 @@ def authenticate_user(
         .first()
     )
 
-    # Không thông báo riêng email có tồn tại hay không.
-    if user is None:
-        raise UnauthorizedError()
-
-    if not verify_password(
+    # Không cho biết riêng email có tồn tại hay không.
+    # Sai email hoặc sai mật khẩu đều trả cùng một lỗi 401.
+    if user is None or not verify_password(
         password,
         user.password_hash,
     ):
-        raise UnauthorizedError()
+        raise UnauthorizedError(
+            message="Email hoặc mật khẩu không chính xác.",
+        )
 
+    # Đúng thông tin đăng nhập nhưng tài khoản bị khóa.
     if not user.is_active:
         raise ForbiddenError(
-            "Tài khoản đã bị khóa hoặc không hoạt động."
+            message="Tài khoản đã bị khóa hoặc không hoạt động.",
         )
 
     return user
