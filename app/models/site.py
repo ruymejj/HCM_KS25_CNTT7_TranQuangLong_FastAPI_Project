@@ -85,9 +85,7 @@ class SiteMember(Base):
     # site_id và user_id tạo thành khóa chính kết hợp.
     site_id = Column(
         Integer,
-        ForeignKey(
-            "construction_sites.id",
-            ondelete="CASCADE",
+        ForeignKey("construction_sites.id", ondelete="CASCADE",
         ),
         primary_key=True,
     )

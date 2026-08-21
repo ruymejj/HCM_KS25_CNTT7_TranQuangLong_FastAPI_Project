@@ -124,3 +124,14 @@ def register_exception_handlers(app: FastAPI) -> None:
         HTTPException,
         http_exception_handler,
     )
+
+class UnauthorizedError(AppException):
+    def __init__(
+        self,
+        message: str = "Không thể xác thực thông tin đăng nhập.",
+    ):
+        super().__init__(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            code="UNAUTHORIZED",
+            message=message,
+        )

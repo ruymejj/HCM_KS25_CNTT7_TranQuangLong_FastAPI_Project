@@ -3,7 +3,7 @@ from sqlalchemy import text
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
-# Import để SQLAlchemy nhận diện toàn bộ model.
+# Import để SQLAlchemy nhận diện tất cả model.
 import app.models
 
 from app.core.config import settings
@@ -17,12 +17,18 @@ from app.db.database import (
     engine,
     get_db,
 )
+from app.routers.auth import router as auth_router
+from app.routers.users import router as users_router
+
+app.include_router(auth_router)
+app.include_router(users_router)
 
 
-# Tạo các bảng nếu chưa tồn tại.
+# Tạo các bảng trong database nếu chưa tồn tại.
 Base.metadata.create_all(bind=engine)
 
 
+# Khởi tạo ứng dụng FastAPI.
 app = FastAPI(
     title=settings.APP_NAME,
     description="API quản lý công trình xây dựng",
@@ -30,8 +36,12 @@ app = FastAPI(
 )
 
 
-# Đăng ký format exception thống nhất.
+# Đăng ký các exception handler.
 register_exception_handlers(app)
+
+
+# Đăng ký Authentication router.
+app.include_router(auth_router)
 
 
 @app.get(
